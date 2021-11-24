@@ -106,9 +106,15 @@ public class SellerDaoJDBC implements SellerDao {
 		
 		return null;
 		
+		
 		} catch (Exception e) {
 			throw new DbException(e.getMessage());
 		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+		}
+		
 	}
 
 	private Seller instantiatingSeller(ResultSet rs, Department dep) throws SQLException {
@@ -131,8 +137,42 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<Seller> list = new ArrayList<>();
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName "
+			        + "FROM seller INNER JOIN department "
+			        + "ON seller.DepartmentId = department.Id "
+			        + "ORDER BY Name");
+			
+			
+			rs = st.executeQuery();
+			
+			Map<Integer, Department> map = new HashMap<>();//instancia um map vazio que receberá os departamento sem que haja repetição
+			
+			while(rs.next()) {
+				Department dep = map.get(rs.getInt("DepartmentId"));//busca, através do get, em "map" algum departamento que tenha o id informado
+				//rs.getInt("DepartmentId")
+				if(dep == null) {
+					dep = instantiatingDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}
+			    
+				Seller seller = instantiatingSeller(rs, dep);
+				list.add(seller);
+			}		
+		
+	    return list;
+		
+		} catch (Exception e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+		}
 	}
 
 }
