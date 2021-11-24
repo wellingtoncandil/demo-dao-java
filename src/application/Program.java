@@ -1,5 +1,7 @@
 package application;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +11,9 @@ import model.entities.Department;
 import model.entities.Seller;
 
 public class Program {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 		@SuppressWarnings("unused")
 		SellerDao sellerDao = DaoFactory.createSellerDao();// desta forma o programa não conhece a implementação
@@ -41,8 +45,25 @@ public class Program {
 		}
 		
 		System.out.println("\n=== TEST 4: seller insert ===");
-		Seller seller2 = new Seller(null, "Greg", "greg@gmail.com", new Date(), 3800.0, department);
+		Date date = new Date();
+		date = sdf.parse("13/12/1991");
+		Seller seller2 = new Seller(null, "Well", "well@gmail.com", date, 3800.0, department);
 		sellerDao.insert(seller2);
 		System.out.println("Inserted! New seller id = " + seller2.getId());
+		
+		System.out.println("\n=== TEST 5: seller update ===");
+		seller = sellerDao.findById(12);
+		seller.setName("Chris");
+		sellerDao.update(seller);
+		System.out.println("Update completed!");
+		
 	}
 }
+
+
+
+
+
+
+
+
